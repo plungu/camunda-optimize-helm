@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "camunda-optimize.labels" . | nindent 4 }}
+  name: environment-config
+data:
+    environment-config.yaml: |
+        engines:
+          'camunda-bpm':
+            name: {{ .Values.camunda.engine.name }}
+            rest: {{ .Values.camunda.engine.restUrl }}
+            importEnabled: {{ .Values.camunda.engine.importEnabled }}
+            eventImportEnabled: {{ .Values.camunda.engine.eventImportEnabled }}
+            webapps:
+              endpoint: {{ .Values.camunda.engine.webappsUrl }}
+              enabled: {{ .Values.camunda.engine.webappsEnabled }}
+            authentication:
+              enabled: {{ .Values.camunda.engine.authentication.enabled }}
+              user: {{ .Values.camunda.engine.authentication.user }}
+              password: {{ .Values.camunda.engine.authentication.password }}
+{{/*        es:*/}}
+{{/*          connection.nodes[*]:*/}}
+{{/*              host: {{ .Values.elasitc.external.host }}*/}}
+{{/*              httpPort: {{ .Values.elasitc.external.port }}*/}}

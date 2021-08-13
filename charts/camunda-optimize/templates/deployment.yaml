@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "camunda-optimize.fullname" . }}
+  labels:
+    {{- include "camunda-optimize.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.general.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "camunda-optimize.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "camunda-optimize.selectorLabels" . | nindent 8 }}
+
+    spec:
+
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      serviceAccountName: {{ include "camunda-optimize.serviceAccountName" . }}
+
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: DEBUG
+              value: "{{ .Values.general.debug }}"
+{{/*            {{- if .Values.elasitc.external.enabled }}*/}}
+{{/*            - name: OPTIMIZE_CAMUNDABPM_REST_URL*/}}
+{{/*              value: "{{ .Values.camunda.external.camundaRestUrl }}"*/}}
+{{/*            - name: OPTIMIZE_CAMUNDABPM_WEBAPPS_URL*/}}
+{{/*              value: "{{ .Values.camunda.external.camundaWebappsUrl }}"*/}}
+            - name: OPTIMIZE_ELASTICSEARCH_HOST
+              value: "{{ .Values.elasitc.external.host }}"
+            - name: OPTIMIZE_ELASTICSEARCH_HTTP_PORT
+              value: "{{ .Values.elasitc.external.port }}"
+{{/*            {{- end }}*/}}
+
+          ports:
+            - name: {{ .Values.service.portName }}
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+
+{{/* Rediness probe must be defined correctly otherwise the Service Endpoints will not be assigned. Thus the app will not be accessible externally */}}
+{{/*          readinessProbe: */}}
+{{/*            httpGet: */}}
+{{/*              path: optimze */}}
+{{/*              port: http */}}
+{{/*            initialDelaySeconds: 60 */}}
+{{/*            periodSeconds: 60 */}}
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          volumeMounts:
+          - mountPath: /optimize/config/environment-config.yaml
+            subPath: environment-config.yaml
+            name: environment-config
+          - mountPath: /optimize/config/OptimizeLicense.txt
+            subPath: OptimizeLicense.txt
+            name: optimize-license
+
+      volumes:
+      - name: environment-config
+        configMap:
+          name: environment-config
+      - name: optimize-license
+        configMap:
+          name: optimize-license
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
