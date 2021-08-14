@@ -19,7 +19,14 @@ data:
               enabled: {{ .Values.camunda.engine.authentication.enabled }}
               user: {{ .Values.camunda.engine.authentication.user }}
               password: {{ .Values.camunda.engine.authentication.password }}
-{{/*        es:*/}}
-{{/*          connection.nodes[*]:*/}}
-{{/*              host: {{ .Values.elasitc.external.host }}*/}}
-{{/*              httpPort: {{ .Values.elasitc.external.port }}*/}}
+        es:
+          connection:
+            timeout: {{ .Values.elasitc.connect.timeout }}
+            nodes:
+              host: {{ .Values.elasitc.connect.host }}
+              httpPort: {{ .Values.elasitc.connect.port }}
+          proxy:
+            enabled: {{ .Values.elasitc.connect.proxy.enabled }}
+            host: {{ .Values.elasitc.connect.proxy.host }}
+            port: {{ .Values.elasitc.connect.proxy.port }}
+            sslEnabled: {{ .Values.elasitc.connect.proxy.sslEnabled }}

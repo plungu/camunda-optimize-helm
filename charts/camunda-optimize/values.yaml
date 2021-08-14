@@ -2,12 +2,14 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# General Configurations for Kubernetes
 general:
   debug: true
   replicaCount: 2
   nameOverride: ""
   fullnameOverride: ""
 
+# EE image pull in configuration
 image:
   repository: registry.camunda.cloud/optimize-ee/optimize
   tag: latest
@@ -15,13 +17,30 @@ image:
   pullSecrets:
     - name: camunda-reg-cred
 
+# Optimize Elastic connection configurations
+# These have not all yet been applied in the data-environment.yaml
 elasitc:
-  external:
-    enabled: true
+  connect:
+    timeout: 10000
     credentialsSecertName: "elastic-search-credentials"
     host: "elasticsearch-master"
     port: "9200"
+    proxy:
+      enabled: false
+      host: "localhost"
+      port: 80
+      sslEnabled: false
+    security:
+      username:
+      password:
+      ssl:
+        enabled: false
+        certificate:
+        certificate_authorities: []
 
+
+# Optimize Camunda connection configurations
+# These have not yet been applied in the data-environment.yaml
 camunda:
   engine:
     name: "default"
@@ -35,6 +54,34 @@ camunda:
       user: ''
       password: ''
 
+# Optimize specific configurations
+# These have not yet been applied in the data-environment.yaml
+optimize:
+  local:
+    available:
+    fallback:
+  history:
+    cleanup:
+      cronTrigger:
+      ttl:
+  webhook:
+    alerting:
+      '${webhookName}':
+          url:
+  email:
+    enabled:
+  eventBasedProcess:
+    eventImport:
+      enabled:
+  telemetry:
+    initializeTelemetry:
+  sharing:
+    enabled:
+  plugin:
+    directory:
+
+
+# Kubernetes Service Resource
 service:
   type: ClusterIP
   port: 8090
@@ -52,6 +99,7 @@ serviceAccount:
 # See link below to install nginx controller
 # https://artifacthub.io/packages/helm/bitnami/nginx-ingress-controller
 
+# Kubernetes Ingress Resource
 ingress:
   enabled: true
   annotations: {
@@ -95,6 +143,7 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
+# Autoscaling configurations
 autoscaling:
   enabled: false
   minReplicas: 2

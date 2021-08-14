@@ -68,6 +68,7 @@ IMPORTANT: The configs in this chart are preconfigured defaults and serve as a q
 
 ====
 
+---
 ==== [[install-ingress-controller]] *Step 1:* Install Ingress Controller with Sticky Sessions
 ====
 IMPORTANT: Kubernetes does not come with an implementation of a LoadBalancer or a Reverse Proxy for Ingress. The Ingerss resource allows you to configure a Controller for your needs. It's important to understand what you need from an inrgess resource then you can choose the appropriate Controller to install. There are a variety of vendors.
@@ -151,7 +152,7 @@ general:
 
 [[configure-external-elastic-search]]
 === *Step 2:* Configure an External Elastic Search Instance
-
+====
 *Download the Elastic HELM charts*
 
 Download with GIT: https://github.com/elastic/helm-charts[Elastic HELM Charts]
@@ -202,6 +203,8 @@ Test the install
 
   curl localhost:9200/_cat/indices
 ----
+====
+
 
 === [[run-camunda]] *Step 3:* Run Camunda
 ====
@@ -241,15 +244,27 @@ image:
     - name: camunda-reg-cred
 ----
 
+---
+NOTE: If issues arise with pulling the image the workaround is to manually pull the image.
+Run the following commands
+
+ docker login registry.camunda.cloud
+
+ docker pull registry.camunda.cloud/optimize-ee/optimize:latest
+
+---
+
 *Configuring the pullSecrets*
 
-TIP: see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/[Configuring pull secrets kubernetes doc] for more info
+TIP: see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/[Configuring pull secrets kubernetes doc] and https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kubectl/[Managing Secrets] for more info
 
 Install the secret and name it camunda-reg-cred
 
 ----
-kubectl create secret docker-registry camunda-reg-cred --docker-server=registry.camunda.cloud --docker-username=<<user>> --docker-password=<<password>> --docker-email=paul.lungu@camunda.com
+kubectl create secret docker-registry camunda-reg-cred --docker-server=registry.camunda.cloud --docker-username=<<user>> --docker-password=<<password>> --docker-email=<your-email>
 ----
+
+TIP: You may need to deref special characters in your passwords i.e. --docker-password=mypassword\!isstrong
 
 Check your secret
 ----
@@ -268,11 +283,35 @@ kubectl get secret camunda-reg-cred --output="jsonpath={.data.\.dockerconfigjson
 
 See <<running-camunda, Running Camunda>> to ensure you have a running Camunda instance.
 
-See values.yaml to update configs. *Make sure to upadte the restUrl and webappsUrl with the correct config.*
+See values.yaml to update configs. *Make sure to update the restUrl and webappsUrl with the correct config.*
 
 *Defaults Below*
 [source,yaml]
 ----
+# Optimize Elastic connection configurations
+# These have not all yet been applied in the data-environment.yaml
+elasitc:
+  connect:
+    timeout: 10000
+    credentialsSecertName: "elastic-search-credentials"
+    host: "elasticsearch-master"
+    port: "9200"
+    proxy:
+      enabled: false
+      host: "localhost"
+      port: 80
+      sslEnabled: false
+    security:
+      username:
+      password:
+      ssl:
+        enabled: false
+        certificate:
+        certificate_authorities: []
+
+
+# Optimize Camunda connection configurations
+# These have not yet been applied in the data-environment.yaml
 camunda:
   engine:
     name: "default"
@@ -285,12 +324,45 @@ camunda:
       enabled: false
       user: ''
       password: ''
+
+# Optimize specific configurations
+# These have not yet been applied in the data-environment.yaml
+optimize:
+  local:
+    available:
+    fallback:
+  history:
+    cleanup:
+      cronTrigger:
+      ttl:
+  webhook:
+    alerting:
+      '${webhookName}':
+          url:
+  email:
+    enabled:
+  eventBasedProcess:
+    eventImport:
+      enabled:
+  telemetry:
+    initializeTelemetry:
+  sharing:
+    enabled:
+  plugin:
+    directory:
 ----
 
 TIP: See the https://docs.camunda.org/optimize/develop/technical-guide/setup/configuration[possible configurations for Optimize]
 
 *The environment-config ConfigMap defined in data-environment.yaml applies the configs to Optimize*
 This will be mounted as a file in the Pod in the config directory as environment-config.yaml where Optimize can pick it up. If you wish to add additional configs you can use this config map and expose the variables in the values.yaml
+
+WARNING: The es.connection.nodes.host and httpPort are not affective. Instead I use the environment vars in the *deployment.yml* to set these environment variables. This is a bit of a hack and will be fixed soon.
+
+    name: OPTIMIZE_ELASTICSEARCH_HOST
+    value: "{{ .Values.elasitc.connect.host }}"
+    name: OPTIMIZE_ELASTICSEARCH_HTTP_PORT
+    value: "{{ .Values.elasitc.connect.port }}"
 
 *Defaults Below*
 [source,yaml]
@@ -302,24 +374,31 @@ metadata:
     {{- include "camunda-optimize.labels" . | nindent 4 }}
   name: environment-config
 data:
-  environment-config.yaml: |
-    engines:
-      'camunda-bpm':
-        name: {{ .Values.camunda.engine.name }}
-        rest: {{ .Values.camunda.engine.restUrl }}
-        importEnabled: {{ .Values.camunda.engine.importEnabled }}
-        eventImportEnabled: {{ .Values.camunda.engine.eventImportEnabled }}
-        webapps:
-          endpoint: {{ .Values.camunda.engine.webappsUrl }}
-          enabled: {{ .Values.camunda.engine.webappsEnabled }}
-        authentication:
-          enabled: {{ .Values.camunda.engine.authentication.enabled }}
-          user: {{ .Values.camunda.engine.authentication.user }}
-          password: {{ .Values.camunda.engine.authentication.password }}
-      es:
-        connection.nodes[*]:
-          host: {{ .Values.elasitc.external.host }}
-          httpPort: {{ .Values.elasitc.external.port }}
+    environment-config.yaml: |
+        engines:
+          'camunda-bpm':
+            name: {{ .Values.camunda.engine.name }}
+            rest: {{ .Values.camunda.engine.restUrl }}
+            importEnabled: {{ .Values.camunda.engine.importEnabled }}
+            eventImportEnabled: {{ .Values.camunda.engine.eventImportEnabled }}
+            webapps:
+              endpoint: {{ .Values.camunda.engine.webappsUrl }}
+              enabled: {{ .Values.camunda.engine.webappsEnabled }}
+            authentication:
+              enabled: {{ .Values.camunda.engine.authentication.enabled }}
+              user: {{ .Values.camunda.engine.authentication.user }}
+              password: {{ .Values.camunda.engine.authentication.password }}
+        es:
+          connection:
+            timeout: {{ .Values.elasitc.connect.timeout }}
+            nodes:
+              host: {{ .Values.elasitc.connect.host }}
+              httpPort: {{ .Values.elasitc.connect.port }}
+          proxy:
+            enabled: {{ .Values.elasitc.connect.proxy.enabled }}
+            host: {{ .Values.elasitc.connect.proxy.host }}
+            port: {{ .Values.elasitc.connect.proxy.port }}
+            sslEnabled: {{ .Values.elasitc.connect.proxy.sslEnabled }}
 ----
 
 *Configure Connection to Elastic Search*
@@ -360,21 +439,20 @@ This is informational. Nothing to do unless you want to change the mount locatio
 [source,yaml]
 ----
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
   labels:
     {{- include "camunda-optimize.labels" . | nindent 4 }}
   name: optimize-license
-data:
+stringData:
   OptimizeLicense.txt:
     --------------- BEGIN CAMUNDA LICENSE KEY ---------------
 
     ---------------  END CAMUNDA LICENSE KEY  ---------------
 ----
 
-*The license ConfigMap mounting definition in the deplyment.yaml*
+*The license Secret mounting definition in the deplyment.yaml*
 This is informational. Nothing to do unless you want to change the mount location or type.
-This will likly change to a secret in the near future.
 
 [source,yaml]
 ----
@@ -385,18 +463,35 @@ This will likly change to a secret in the near future.
 
       volumes:
       - name: optimize-license
-        configMap:
-          name: optimize-license
+        secret:
+          secretName: optimize-license
 ----
+====
 
+==== Troubleshoot volumes, configMaps and secrets
+====
+*Check the secret exists*
 
-//The `licenseSecertName:` allows us to use a secret resource for DB credentials.
-//
-//The `url:` uses the deployment name of the postgres resource. This is echoed in the notes after the install.
+ kubectl get secret optimize-license -o yaml
+
+ kubectl get secret camunda-reg-cred --output=yaml
+
+*Check the secrets are created properly*
+
+ kubectl get secret camunda-reg-cred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode
+
+ kubectl get secret optimize-license --output="jsonpath={.data.OptimizeLicense\.txt}"
+
+*Look at the mounted license file* use exec command into pod file system. You should see
+
+ cat config/OptimizeLicense.txt
+
+See https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kubectl/[Managing Secrets] for more info.
 
 ====
-TIP: For more configuration options see https://github.com/camunda/docker-camunda-optimize/blob/next/README.md
 
+
+TIP: For more configuration options see https://github.com/camunda/docker-camunda-optimize/blob/next/README.md
 
 ==== [[optimize-run]] *Step 7:* Run the Chart
 ====
