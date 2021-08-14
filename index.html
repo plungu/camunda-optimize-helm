@@ -444,32 +444,33 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <span id="author" class="author">Doc Writer</span><br>
 <span id="email" class="email"><a href="mailto:paul.lungu@camunda.com">paul.lungu@camunda.com</a></span><br>
 <span id="revnumber">version 1.0,</span>
-<span id="revdate">2020-03-15</span>
+<span id="revdate">2020-08-13</span>
 </div>
 <div id="toc" class="toc">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_goals">Goals</a></li>
 <li><a href="#_what_is_configured_in_this_chart">What is configured in this chart</a></li>
-<li><a href="#_how_to_run_this_helm_chart">How to run this Helm chart</a>
+<li><a href="#_how_does_it_work">How does it work</a></li>
+<li><a href="#_steps_to_run_this_helm_chart">Steps to run this HELM chart</a>
 <ul class="sectlevel3">
-<li><a href="#_prerequisites_before_you_run">Prerequisites before you run</a></li>
-<li><a href="#_run_the_chart">Run the Chart</a></li>
+<li><a href="#_stop_before_you_run_it"><strong>STOP</strong> before you run it</a></li>
 </ul>
 </li>
-<li><a href="#_how_does_it_work">How does it work</a>
-<ul class="sectlevel2">
-<li><a href="#_values_yaml">values.yaml</a></li>
+<li><a href="#_setup_infra_and_architecture_for_optimize"> Setup Infra and Architecture for Optimize</a>
+<ul class="sectlevel3">
+<li><a href="#_step_0_install_helm_and_kubernetes"> <strong>Step 0:</strong> Install HELM and Kubernetes</a></li>
+<li><a href="#_step_1_install_ingress_controller_with_sticky_sessions"> <strong>Step 1:</strong> Install Ingress Controller with Sticky Sessions</a></li>
+<li><a href="#configure-external-elastic-search"><strong>Step 2:</strong> Configure an External Elastic Search Instance</a></li>
+<li><a href="#_step_3_run_camunda"> <strong>Step 3:</strong> Run Camunda</a></li>
 </ul>
 </li>
-<li><a href="#_prerequisites_for_setting_up_optimize">Prerequisites for setting up Optimize</a>
-<ul class="sectlevel2">
-<li><a href="#_configure_the_version_of_optimize">Configure the version of Optimize</a></li>
-<li><a href="#_configure_optimize_connections">Configure Optimize Connections</a></li>
-<li><a href="#_configure_the_optimize_license">Configure the Optimize License</a></li>
-<li><a href="#_configure_load_balancer_with_sticky_sessions">Configure Load Balancer with Sticky Sessions</a></li>
-<li><a href="#configure-external-elastic-search">Configure an External Elastic Search Instance</a></li>
-<li><a href="#_run_camunda"> Run Camunda</a></li>
+<li><a href="#_setup_optimize">Setup Optimize</a>
+<ul class="sectlevel3">
+<li><a href="#_step_4_configure_the_version_of_optimize"> <strong>Step 4:</strong> Configure the version of Optimize</a></li>
+<li><a href="#_step_5_configure_optimize_connections"><strong>Step 5:</strong> Configure Optimize Connections</a></li>
+<li><a href="#_step_6_configure_the_optimize_license"><strong>Step 6:</strong> Configure the Optimize License</a></li>
+<li><a href="#_step_7_run_the_chart"> <strong>Step 7:</strong> Run the Chart</a></li>
 </ul>
 </li>
 <li><a href="#_whats_next">Whats Next</a></li>
@@ -488,13 +489,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Simple and understandable HELM Optimize example</p>
 </li>
 <li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-8">
-<p>Apply common configuration and architectural concepts</p>
+<p>Help understand common configuration and architectural concepts</p>
 </li>
 <li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-9">
-<p>Good documentation with little assumptions of understanding HELM, Kubernetes or Optimize</p>
+<p>Good documentation and example to assist in getting Optimize running quickly in Kubernetes</p>
 </li>
 <li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-10">
-<p>Able to run quickly without help out side this README</p>
+<p><strong>NOT</strong> intended as a production ready configuration</p>
 </li>
 </ul>
 </div>
@@ -509,10 +510,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>&#10003; Optimize</p>
 </li>
 <li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-15">
-<p>&#10063; Optimize EE Repo Pull</p>
+<p>&#10003; Optimize EE Repo Pull</p>
 </li>
 <li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-16">
-<p>&#10063; Optimize License</p>
+<p>&#10003; Optimize License</p>
 </li>
 <li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-17">
 <p>&#10003; Load Balancer with sticky sessions</p>
@@ -524,352 +525,147 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 </div>
-<div class="sect1 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-24">
-<h2 id="_how_to_run_this_helm_chart">How to run this Helm chart</h2>
-<div class="sectionbody">
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-26">
-<p><strong>Install HELM and Kubernetes</strong></p>
-</div>
-<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-27">
-<div class="content">
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-28">
-<p>Though the goal of this is to be able to run this example quickly and easily the assumption is you have some experience with Kubernetes and HELM.</p>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-30">
-<p>You can find more on HELM here <a href="https://helm.sh/docs/intro/quickstart/">Helm Quickstart</a></p>
-</div>
-</div>
-</div>
-<div class="sect3 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-33">
-<h4 id="_prerequisites_before_you_run">Prerequisites before you run</h4>
-<div class="admonitionblock note has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-34">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-These can be omitted if you run the basic HELM chart without the Postgres DB and only a single node in the cluster without a load balancer
-</td>
-</tr>
-</table>
-</div>
-<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-35">
-<div class="content">
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-36">
-<p><strong>See <a href="#configure-external-elastic-search">Install and Configure Elastic Search</a> in the Kubernetes cluster</strong></p>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-38">
-<p><strong>See <a href="#install-ingress-controller">Install Ingress Contorller</a> to configure the loadbalaner ingress controller</strong></p>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-40">
-<p><strong>See <a href="#optimize-license">Install Optimize License</a> to download and install Optimize License</strong></p>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-42">
-<p><strong>See <a href="#run-camunda">Run Camunda</a> to install and run a Camunda instance Optimize can pull data from</strong></p>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-44">
-<p><strong>See <a href="#optimize-configure">Configure Optimize Connections</a> to connect to Camunda and Elastic Search</strong></p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect3 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-48">
-<h4 id="_run_the_chart">Run the Chart</h4>
-<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-49">
-<div class="content">
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-50">
-<p><strong>Runing the Chart</strong> the following command to install the chart and apply the configurations to the Kubernetes cluster</p>
-</div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-51">
-<div class="content">
-<pre>helm install optimize-demo ./camunda/camunda-helm/charts/camunda-optimize/</pre>
-</div>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-55">
-<p><strong>Change the Chart </strong>&#8201;&#8212;&#8201;When you make changes run the following command to apply the changes to the cluster</p>
-</div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-56">
-<div class="content">
-<pre>helm upgrade optimize-demo ./camunda/camunda-helm/charts/camunda-optimize/</pre>
-</div>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-60">
-<p><strong>Remove the Chart </strong> &#8201;&#8212;&#8201;To remove the installation</p>
-</div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-61">
-<div class="content">
-<pre>helm uninstall optimize-demo</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-67">
+<div class="sect1 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-21">
 <h2 id="_how_does_it_work">How does it work</h2>
 <div class="sectionbody">
-<div class="sect2 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-69">
-<h3 id="_values_yaml">values.yaml</h3>
-<div class="admonitionblock important has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-71">
+<div class="admonitionblock important has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-23">
 <table>
 <tr>
 <td class="icon">
 <div class="title">Important</div>
 </td>
 <td class="content">
-the primary configuration point is the values.yaml. The configs below have already been applied. The configs below are a quick reference for understanding.
+The configs in this chart are preconfigured defaults and serve as a quick reference for understanding. <strong>You may need to change and adjust things to suit your use-case, infra, architecture, etc &#8230;&#8203;</strong>
 </td>
 </tr>
 </table>
 </div>
+<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-25">
+<ul>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-25">
+<p>The HELM chart is an install descriptor to install Optimize on Kubernetes. HELM can do many things to help install and manage infra on Kubernetes.</p>
+</li>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-26">
+<p>The primary configuration point is the values.yaml. It should allow you to get a basic Optimize configuration installed and running with little to no customizations.</p>
+</li>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-27">
+<p>You still need to know how to debug on Kubernetes. See the <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/">Kubernetes Docs</a> for help.</p>
+</li>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-28">
+<p>While this chart defines how Optimize is installed other components need to be installed in your Kubernetes cluster to make Optimize work. See <a href="#steps-to-run">Setting up Infra</a> to install the other components.</p>
+</li>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-29">
+<p>You can find more on HELM here <a href="https://helm.sh/docs/intro/quickstart/">Helm Quickstart</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>
-<div class="sect1 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-74">
-<h2 id="_prerequisites_for_setting_up_optimize">Prerequisites for setting up Optimize</h2>
+<div class="sect1 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-31">
+<h2 id="_steps_to_run_this_helm_chart"><a id="steps-to-run"></a>Steps to run this HELM chart</h2>
 <div class="sectionbody">
-<div class="sect2 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-76">
-<h3 id="_configure_the_version_of_optimize">Configure the version of Optimize</h3>
-<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-77">
+<div class="sect3 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-33">
+<h4 id="_stop_before_you_run_it"><strong>STOP</strong> before you run it</h4>
+<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-34">
 <div class="content">
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-78">
-<p>In this case the latest image is used. But we could swap different images and versions.</p>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-35">
+<p><strong>Step 0. <a href="#install-helm">Install HELM and Kubernetes</a></strong> if not already installed</p>
 </div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-80">
-<p>See the <a href="https://registry.camunda.cloud/harbor/projects/4/repositories">Camunda Harbor Repo</a> if you need a different version of Optimize.</p>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-37">
+<p><strong>Step 1. <a href="#install-ingress-controller">Install Ingress Contorller</a> to configure the loadbalaner ingress controller</strong></p>
 </div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-82">
-<p><strong>Pulling from the Enterprise Repo</strong></p>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-39">
+<p><strong>Step 2. <a href="#configure-external-elastic-search">Install and Configure Elastic Search</a> in the Kubernetes cluster</strong></p>
 </div>
-<div class="admonitionblock note has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-84">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-you will need your enterprise credentials and an enterprise license for Optimize.
-</td>
-</tr>
-</table>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-41">
+<p><strong>Step 3. <a href="#run-camunda">Run Camunda</a> you will need a Camunda instance Optimize can pull data from</strong></p>
 </div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-86">
-<p>The version of Optimize can be changed in this section of the values.yaml</p>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-43">
+<p><strong>Step 4. <a href="#optimize-version">Configure Optimize Version</a></strong></p>
 </div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-89">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-45">
+<p><strong>Step 5. <a href="#optimize-connections">Configure Optimize Connections</a> to Camunda and Elastic Search</strong></p>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-47">
+<p><strong>Step 6. <a href="#optimize-license">Install Optimize License</a></strong></p>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-49">
+<p><strong>Step 6. <a href="#optimize-run">Run Optimize</a></strong></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-53">
+<h2 id="_setup_infra_and_architecture_for_optimize"><a id="setup-infra"></a> Setup Infra and Architecture for Optimize</h2>
+<div class="sectionbody">
+<div class="sect3 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-55">
+<h4 id="_step_0_install_helm_and_kubernetes"><a id="install-helm"></a> <strong>Step 0:</strong> Install HELM and Kubernetes</h4>
+<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-56">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="yaml"><span style="color:#606">image</span>:
-  <span style="color:#606">repository</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">registry.camunda.cloud/optimize-ee/optimize</span></span>
-  <span style="color:#606">tag</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">latest</span></span>
-  <span style="color:#606">pullPolicy</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">IfNotPresent</span></span>
-  <span style="color:#606">pullSecrets</span>:
-    - <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">name: camunda-reg-cred</span></span></code></pre>
+<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-57">
+<ul>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-57">
+<p>You can find more on HELM here <a href="https://helm.sh/docs/intro/quickstart/">Helm Quickstart</a></p>
+</li>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-58">
+<p><a href="https://kubernetes.io/docs/setup/">Kubernetes Getting Started</a></p>
+</li>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-59">
+<p>Try <a href="https://www.docker.com/products/docker-desktop">Docker Desktop</a> imo it&#8217;s the quickest way to get started with Kubernetes</p>
+</li>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-61">
+<p>Tested with HELM</p>
+<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-62">
+<ul>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-62">
+<p><code>version.BuildInfo{Version:"v3.5.3", GitCommit:"041ce5a2c17a58be0fcd5f5e16fb3e7e95fea622", GitTreeState:"dirty", GoVersion:"go1.16"}</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-64">
+<p>Tested with Kubernetes</p>
+<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-65">
+<ul>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-65">
+<p><code>Client Version: version.Info{Major:"1", Minor:"21", GitVersion:"v1.21.2", GitCommit:"092fbfbf53427de67cac1e9fa54aaa09a28371d7", GitTreeState:"clean", BuildDate:"2021-06-16T12:59:11Z", GoVersion:"go1.16.5", Compiler:"gc", Platform:"darwin/amd64"}</code></p>
+</li>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-67">
+<p><code>Server Version: version.Info{Major:"1", Minor:"21", GitVersion:"v1.21.2", GitCommit:"092fbfbf53427de67cac1e9fa54aaa09a28371d7", GitTreeState:"clean", BuildDate:"2021-06-16T12:53:14Z", GoVersion:"go1.16.5", Compiler:"gc", Platform:"linux/amd64"}</code></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
 </div>
 </div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-98">
-<p><strong>Configuring the pullSecrets</strong></p>
 </div>
-<div class="admonitionblock tip has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-100">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Tip</div>
-</td>
-<td class="content">
-see <a href="https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/">Configuring pull secrets kubernetes doc</a> for more info
-</td>
-</tr>
-</table>
 </div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-102">
-<p>Install the secret and name it camunda-reg-cred</p>
-</div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-104">
+<div class="sect3 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-71">
+<h4 id="_step_1_install_ingress_controller_with_sticky_sessions"><a id="install-ingress-controller"></a> <strong>Step 1:</strong> Install Ingress Controller with Sticky Sessions</h4>
+<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-72">
 <div class="content">
-<pre>kubectl create secret docker-registry camunda-reg-cred --docker-server=registry.camunda.cloud --docker-username=&lt;&lt;user&gt;&gt; --docker-password=&lt;&lt;password&gt;&gt; --docker-email=paul.lungu@camunda.com</pre>
-</div>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-108">
-<p>Check your secret</p>
-</div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-109">
-<div class="content">
-<pre>kubectl get secret camunda-reg-cred --output=yaml
-
-kubectl get secret camunda-reg-cred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode</pre>
-</div>
-</div>
-</div>
-</div>
-<hr>
-</div>
-<div class="sect2 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-119">
-<h3 id="_configure_optimize_connections"><a id="optimize-configure"></a>Configure Optimize Connections</h3>
-<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-120">
-<div class="content">
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-121">
-<p><strong>Configurations can be placed in the environment-config ConfigMap defined in data-environment.yaml</strong>
-This will be mounted as a file in the Pod in the config directory as environment-config.yaml</p>
-</div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-124">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="yaml"><span style="color:#606">apiVersion</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">v1</span></span>
-<span style="color:#606">kind</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">ConfigMap</span></span>
-<span style="color:#606">metadata</span>:
-  <span style="color:#606">labels</span>:
-    {{- <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">include &quot;camunda-optimize.labels&quot; . | nindent 4 }}</span></span>
-  <span style="color:#606">name</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">environment-config</span></span>
-<span style="color:#606">data</span>:
-    <span style="color:#606">environment-config.yaml</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">|</span><span style="color:#D20">
-        engines:
-          'camunda-bpm':
-            name: {{ .Values.camunda.engine.name }}
-            rest: {{ .Values.camunda.engine.restUrl }}
-            importEnabled: {{ .Values.camunda.engine.importEnabled }}
-            eventImportEnabled: {{ .Values.camunda.engine.eventImportEnabled }}
-            webapps:
-              endpoint: {{ .Values.camunda.engine.webappsUrl }}
-              enabled: {{ .Values.camunda.engine.webappsEnabled }}
-            authentication:
-              enabled: {{ .Values.camunda.engine.authentication.enabled }}
-              user: {{ .Values.camunda.engine.authentication.user }}
-              password: {{ .Values.camunda.engine.authentication.password }}
-        es:
-          connection.nodes[*]:
-              host: {{ .Values.elasitc.external.host }}
-              httpPort: {{ .Values.elasitc.external.port }}</span></span></code></pre>
-</div>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-153">
-<p>See the <a href="https://docs.camunda.org/optimize/develop/technical-guide/setup/configuration">possible configurations for Optimize</a></p>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-156">
-<p><strong>Configure the connection to Camunda</strong></p>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-158">
-<p>See <a href="#running-camunda">Running Camunda</a> to ensure you have a running Camunda instance.</p>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-160">
-<p>See values.yaml to update configs. <strong>Make sure to upadte the restUrl and webappsUrl with the correct config.</strong></p>
-</div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-163">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="yaml"><span style="color:#606">camunda</span>:
-  <span style="color:#606">engine</span>:
-    <span style="color:#606">name</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">default</span><span style="color:#710">&quot;</span></span>
-    <span style="color:#606">webappsEnabled</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">true</span></span>
-    <span style="color:#606">restUrl</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">http://10.1.0.40:8080/engine-rest</span><span style="color:#710">&quot;</span></span>
-    <span style="color:#606">webappsUrl</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">http://10.1.0.40:8080/camunda</span><span style="color:#710">&quot;</span></span>
-    <span style="color:#606">importEnabled</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">true</span></span>
-    <span style="color:#606">eventImportEnabled</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">true</span></span>
-    <span style="color:#606">authentication</span>:
-      <span style="color:#606">enabled</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">false</span></span>
-      <span style="color:#606">user</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">''</span></span>
-      <span style="color:#606">password</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">''</span></span></code></pre>
-</div>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-178">
-<p><strong>Configure Connection to Elastic Search</strong>
-See values.yaml to update configs</p>
-</div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-181">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="yaml"><span style="color:#606">elasitc</span>:
-  <span style="color:#606">external</span>:
-    <span style="color:#606">enabled</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">true</span></span>
-    <span style="color:#606">credentialsSecertName</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">elastic-search-credentials</span><span style="color:#710">&quot;</span></span>
-    <span style="color:#606">host</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">elasticsearch-master</span><span style="color:#710">&quot;</span></span>
-    <span style="color:#606">port</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">9200</span><span style="color:#710">&quot;</span></span></code></pre>
-</div>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-190">
-<p><strong>Environment configs mounting definition in the deployment.yaml</strong></p>
-</div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-192">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="yaml">          <span style="color:#606">volumeMounts</span>:
-          - <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">mountPath: /optimize/config/environment-config.yaml</span></span>
-            <span style="color:#606">subPath</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">environment-config.yaml</span></span>
-            <span style="color:#606">name</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">environment-config</span></span>
-
-      <span style="color:#606">volumes</span>:
-      - <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">name: environment-config</span></span>
-        <span style="color:#606">configMap</span>:
-          <span style="color:#606">name</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">environment-config</span></span></code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-205">
-<h3 id="_configure_the_optimize_license"><a id="optimize-license"></a>Configure the Optimize License</h3>
-<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-206">
-<div class="content">
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-207">
-<p><strong>The license will be mounted from in the ConfigMap</strong> See the deployment.yaml for mounts</p>
-</div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-209">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="yaml">          <span style="color:#606">volumeMounts</span>:
-          - <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">mountPath: /optimize/config/OptimizeLicense.txt</span></span>
-            <span style="color:#606">subPath</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">OptimizeLicense.txt</span></span>
-            <span style="color:#606">name</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">optimize-license</span></span>
-
-      <span style="color:#606">volumes</span>:
-      - <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">name: optimize-license</span></span>
-        <span style="color:#606">configMap</span>:
-          <span style="color:#606">name</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">optimize-license</span></span></code></pre>
-</div>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-227">
-<p><strong>Add your license to the data-license.yaml</strong></p>
-</div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-229">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="yaml"><span style="color:#606">apiVersion</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">v1</span></span>
-<span style="color:#606">kind</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">ConfigMap</span></span>
-<span style="color:#606">metadata</span>:
-  <span style="color:#606">labels</span>:
-    {{- <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">include &quot;camunda-optimize.labels&quot; . | nindent 4 }}</span></span>
-  <span style="color:#606">name</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">optimize-license</span></span>
-<span style="color:#606">data</span>:
-  <span style="color:#606">OptimizeLicense.txt</span>:
-    <span style="color:#F00;background-color:#FAA">--------------- BEGIN CAMUNDA LICENSE KEY ---------------</span>
-
-    <span style="color:#F00;background-color:#FAA">---------------  END CAMUNDA LICENSE KEY  ---------------</span></code></pre>
-</div>
-</div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-243">
-<p>For more configuration options see <a href="https://github.com/camunda/docker-camunda-optimize/blob/next/README.md" class="bare">https://github.com/camunda/docker-camunda-optimize/blob/next/README.md</a></p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-247">
-<h3 id="_configure_load_balancer_with_sticky_sessions"><a id="install-ingress-controller"></a>Configure Load Balancer with Sticky Sessions</h3>
-<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-248">
-<div class="content">
-<div class="admonitionblock important has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-249">
+<div class="admonitionblock important has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-73">
 <table>
 <tr>
 <td class="icon">
 <div class="title">Important</div>
 </td>
 <td class="content">
-Kuberneted does not come with an implementation of a LoadBalancer or a Reverse Proxy for Ingress. The Ingerss resource allows you to configure a Controller for your needs. It&#8217;s important to understand what you need from an inrgess resource then you can choose the appropriate Controller to install. There are a variety of vendors.
+Kubernetes does not come with an implementation of a LoadBalancer or a Reverse Proxy for Ingress. The Ingerss resource allows you to configure a Controller for your needs. It&#8217;s important to understand what you need from an inrgess resource then you can choose the appropriate Controller to install. There are a variety of vendors.
 </td>
 </tr>
 </table>
 </div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-251">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-75">
 <p><strong>Tested with</strong> <a href="https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac" class="bare">https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac</a></p>
 </div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-253">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-77">
 <p><strong>Install the NGINX Ingress Controller</strong></p>
 </div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-254">
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-78">
 <div class="content">
 <pre>kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.44.0/deploy/static/provider/cloud/deploy.yaml</pre>
 </div>
@@ -877,15 +673,17 @@ Kuberneted does not come with an implementation of a LoadBalancer or a Reverse P
 </div>
 </div>
 <hr>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-261">
-<p><strong>Configure the Ingress Resource for nginx with sticky sessions</strong></p>
-</div>
-<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-262">
+<div class="sect4 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-85">
+<h5 id="_configure_the_ingress_resource_for_nginx_with_sticky_sessions">Configure the Ingress resource for Nginx with sticky sessions</h5>
+<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-86">
 <div class="content">
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-263">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-87">
 <p>Update the values.yaml and configure the Ingress Resource to tell the LoadBalancer (the NGINX deployment that was installed above) to stick to one Optimize instance once the user is logged into the webapps.</p>
 </div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-266">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-89">
+<p><strong>Defaults Below</strong></p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-91">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="yaml">  <span style="color:#606">ingress</span>:
     <span style="color:#606">enabled</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">true</span></span>
@@ -908,58 +706,21 @@ Kuberneted does not come with an implementation of a LoadBalancer or a Reverse P
     <span style="color:#777">#      - camunda-optimize.local   - camunda-optimize.local</span></code></pre>
 </div>
 </div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-289">
-<p><strong>Troubleshoot Ingress, Pods and Services</strong></p>
-</div>
-<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-291">
-<ul>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-291">
-<p>Check the Service and Ingress endpoints</p>
-<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-292">
-<ul>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-292">
-<p><code>kubectl describe ingress optimize-demo-camunda-optimize</code></p>
-</li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-293">
-<p><code>kubectl describe service optimize-demo-camunda-optimize</code></p>
-</li>
-</ul>
-</div>
-</li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-295">
-<p>Check the pods</p>
-<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-296">
-<ul>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-296">
-<p><code>kubectl describe pods optimize-demo-camunda-optimize</code></p>
-</li>
-</ul>
-</div>
-</li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-298">
-<p>Check that the Service Selectors get the pods</p>
-<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-299">
-<ul>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-299">
-<p><code>kubectl get pods --show-labels | egrep 'app.kubernetes.io/instance=optimize-demo,app.kubernetes.io/name=camunda-optimize'</code></p>
-</li>
-</ul>
-</div>
-</li>
-</ul>
-</div>
 </div>
 </div>
 <hr>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-305">
-<p><strong>Increase the replica count of the Nodes</strong></p>
 </div>
-<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-306">
+<div class="sect4 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-117">
+<h5 id="_increase_the_replica_count_of_the_nodes">Increase the replica count of the Nodes</h5>
+<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-118">
 <div class="content">
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-308">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-120">
 <p>Update the values.yaml and increase the replica count so the load balancer will send requests to both nodes for a user that is not already logged in to web apps.</p>
 </div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-311">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-122">
+<p><strong>Defaults Below</strong></p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-124">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="yaml"><span style="color:#606">general</span>:
   <span style="color:#606">debug</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">true</span></span>
@@ -972,19 +733,71 @@ Kuberneted does not come with an implementation of a LoadBalancer or a Reverse P
 </div>
 <hr>
 </div>
-<div class="sect2 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-323">
-<h3 id="configure-external-elastic-search">Configure an External Elastic Search Instance</h3>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-325">
+<div class="sect4 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-135">
+<h5 id="_troubleshoot_kubernetes_resources">Troubleshoot Kubernetes Resources</h5>
+<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-136">
+<div class="content">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-137">
+<p><strong>Troubleshoot Ingress, Pods and Services</strong></p>
+</div>
+<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-139">
+<ul>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-139">
+<p>Check the Service and Ingress endpoints</p>
+<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-140">
+<ul>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-140">
+<p><code>kubectl describe ingress optimize-demo-camunda-optimize</code></p>
+</li>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-141">
+<p><code>kubectl describe service optimize-demo-camunda-optimize</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-143">
+<p>Check the pods</p>
+<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-144">
+<ul>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-144">
+<p><code>kubectl describe pods optimize-demo-camunda-optimize</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-146">
+<p>Check that the Service Selectors get the pods</p>
+<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-147">
+<ul>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-147">
+<p><code>kubectl get pods --show-labels | egrep 'app.kubernetes.io/instance=optimize-demo,app.kubernetes.io/name=camunda-optimize'</code></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect2 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-153">
+<h3 id="configure-external-elastic-search"><strong>Step 2:</strong> Configure an External Elastic Search Instance</h3>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-155">
 <p><strong>Download the Elastic HELM charts</strong></p>
 </div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-327">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-157">
 <p>Download with GIT: <a href="https://github.com/elastic/helm-charts">Elastic HELM Charts</a></p>
 </div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-329">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-159">
 <p><strong>Update the values.yaml</strong>
 Update the values.yaml in for the correct version of Elastic. <strong>Tested with 7.11.2</strong> in the <a href="https://github.com/elastic/helm-charts/tree/master/elasticsearch/examples/docker-for-mac">Docker for Mac Examples</a>.</p>
 </div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-333">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-162">
+<p><strong>Use Values Below</strong></p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-164">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="yaml"><span style="color:#777"># Permit co-located instances for solitary minikube virtual machines.</span>
 <span style="color:#606">antiAffinity</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">soft</span><span style="color:#710">&quot;</span></span>
@@ -1012,18 +825,18 @@ Update the values.yaml in for the correct version of Elastic. <strong>Tested wit
       <span style="color:#606">storage</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">1G</span></span></code></pre>
 </div>
 </div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-361">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-192">
 <p>Run the install</p>
 </div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-363">
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-194">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="sh">make install</code></pre>
 </div>
 </div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-367">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-198">
 <p>Test the install</p>
 </div>
-<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-369">
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-200">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="sh">  kubectl port-forward svc/elasticsearch-master 9200
 
@@ -1031,22 +844,22 @@ Update the values.yaml in for the correct version of Elastic. <strong>Tested wit
 </div>
 </div>
 </div>
-<div class="sect2 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-375">
-<h3 id="_run_camunda"><a id="run-camunda"></a> Run Camunda</h3>
-<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-376">
+<div class="sect2 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-206">
+<h3 id="_step_3_run_camunda"><a id="run-camunda"></a> <strong>Step 3:</strong> Run Camunda</h3>
+<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-207">
 <div class="content">
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-378">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-209">
 <p>To Run Camunda see the</p>
 </div>
-<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-380">
+<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-211">
 <ul>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-380">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-211">
 <p><a href="https://github.com/plungu/camunda-helm">HELM Chart</a> to install on Kubernetes</p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-382">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-213">
 <p>or <a href="https://docs.camunda.org/manual/7.15/introduction/downloading-camunda/">Download a Distro or use SpringBoot</a></p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-384">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-215">
 <p>or <a href="https://docs.camunda.org/manual/7.15/installation/docker/">Run in Docker</a></p>
 </li>
 </ul>
@@ -1056,114 +869,402 @@ Update the values.yaml in for the correct version of Elastic. <strong>Tested wit
 </div>
 </div>
 </div>
-<div class="sect1 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-390">
+<div class="sect1 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-219">
+<h2 id="_setup_optimize"><a id="optimize-setup"></a>Setup Optimize</h2>
+<div class="sectionbody">
+<div class="sect3 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-221">
+<h4 id="_step_4_configure_the_version_of_optimize"><a id="optimize-version"></a> <strong>Step 4:</strong> Configure the version of Optimize</h4>
+<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-222">
+<div class="content">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-223">
+<p>In this case the latest image is used. But we could swap different images and versions.</p>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-225">
+<p>See the <a href="https://registry.camunda.cloud/harbor/projects/4/repositories">Camunda Harbor Repo</a> if you need a different version of Optimize.</p>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-227">
+<p><strong>Pulling from the Enterprise Repo</strong></p>
+</div>
+<div class="admonitionblock note has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-229">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+you will need your enterprise credentials and an enterprise license for Optimize.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-231">
+<p>The version of Optimize can be changed in this section of the values.yaml</p>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-233">
+<p><strong>Defaults Below</strong></p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-235">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span style="color:#606">image</span>:
+  <span style="color:#606">repository</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">registry.camunda.cloud/optimize-ee/optimize</span></span>
+  <span style="color:#606">tag</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">latest</span></span>
+  <span style="color:#606">pullPolicy</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">IfNotPresent</span></span>
+  <span style="color:#606">pullSecrets</span>:
+    - <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">name: camunda-reg-cred</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-244">
+<p><strong>Configuring the pullSecrets</strong></p>
+</div>
+<div class="admonitionblock tip has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-246">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+see <a href="https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/">Configuring pull secrets kubernetes doc</a> for more info
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-248">
+<p>Install the secret and name it camunda-reg-cred</p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-250">
+<div class="content">
+<pre>kubectl create secret docker-registry camunda-reg-cred --docker-server=registry.camunda.cloud --docker-username=&lt;&lt;user&gt;&gt; --docker-password=&lt;&lt;password&gt;&gt; --docker-email=paul.lungu@camunda.com</pre>
+</div>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-254">
+<p>Check your secret</p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-255">
+<div class="content">
+<pre>kubectl get secret camunda-reg-cred --output=yaml
+
+kubectl get secret camunda-reg-cred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode</pre>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div class="sect3 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-265">
+<h4 id="_step_5_configure_optimize_connections"><strong>Step 5:</strong> <a id="optimize-connections"></a>Configure Optimize Connections</h4>
+<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-266">
+<div class="content">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-267">
+<p><strong>Configure the connection to Camunda</strong></p>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-269">
+<p>See <a href="#running-camunda">Running Camunda</a> to ensure you have a running Camunda instance.</p>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-271">
+<p>See values.yaml to update configs. <strong>Make sure to upadte the restUrl and webappsUrl with the correct config.</strong></p>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-273">
+<p><strong>Defaults Below</strong></p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-275">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span style="color:#606">camunda</span>:
+  <span style="color:#606">engine</span>:
+    <span style="color:#606">name</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">default</span><span style="color:#710">&quot;</span></span>
+    <span style="color:#606">webappsEnabled</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">true</span></span>
+    <span style="color:#606">restUrl</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">http://10.1.0.40:8080/engine-rest</span><span style="color:#710">&quot;</span></span>
+    <span style="color:#606">webappsUrl</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">http://10.1.0.40:8080/camunda</span><span style="color:#710">&quot;</span></span>
+    <span style="color:#606">importEnabled</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">true</span></span>
+    <span style="color:#606">eventImportEnabled</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">true</span></span>
+    <span style="color:#606">authentication</span>:
+      <span style="color:#606">enabled</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">false</span></span>
+      <span style="color:#606">user</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">''</span></span>
+      <span style="color:#606">password</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">''</span></span></code></pre>
+</div>
+</div>
+<div class="admonitionblock tip has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-290">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+See the <a href="https://docs.camunda.org/optimize/develop/technical-guide/setup/configuration">possible configurations for Optimize</a>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-292">
+<p><strong>The environment-config ConfigMap defined in data-environment.yaml applies the configs to Optimize</strong>
+This will be mounted as a file in the Pod in the config directory as environment-config.yaml where Optimize can pick it up. If you wish to add additional configs you can use this config map and expose the variables in the values.yaml</p>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-295">
+<p><strong>Defaults Below</strong></p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-297">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span style="color:#606">apiVersion</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">v1</span></span>
+<span style="color:#606">kind</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">ConfigMap</span></span>
+<span style="color:#606">metadata</span>:
+  <span style="color:#606">labels</span>:
+    {{- <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">include &quot;camunda-optimize.labels&quot; . | nindent 4 }}</span></span>
+  <span style="color:#606">name</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">environment-config</span></span>
+<span style="color:#606">data</span>:
+  <span style="color:#606">environment-config.yaml</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">|</span><span style="color:#D20">
+    engines:
+      'camunda-bpm':
+        name: {{ .Values.camunda.engine.name }}
+        rest: {{ .Values.camunda.engine.restUrl }}
+        importEnabled: {{ .Values.camunda.engine.importEnabled }}
+        eventImportEnabled: {{ .Values.camunda.engine.eventImportEnabled }}
+        webapps:
+          endpoint: {{ .Values.camunda.engine.webappsUrl }}
+          enabled: {{ .Values.camunda.engine.webappsEnabled }}
+        authentication:
+          enabled: {{ .Values.camunda.engine.authentication.enabled }}
+          user: {{ .Values.camunda.engine.authentication.user }}
+          password: {{ .Values.camunda.engine.authentication.password }}
+      es:
+        connection.nodes[*]:
+          host: {{ .Values.elasitc.external.host }}
+          httpPort: {{ .Values.elasitc.external.port }}</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-325">
+<p><strong>Configure Connection to Elastic Search</strong>
+See values.yaml to update configs</p>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-328">
+<p><strong>Defaults Below</strong></p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-330">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span style="color:#606">elasitc</span>:
+  <span style="color:#606">external</span>:
+    <span style="color:#606">enabled</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">true</span></span>
+    <span style="color:#606">host</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">elasticsearch-master</span><span style="color:#710">&quot;</span></span>
+    <span style="color:#606">port</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#710">&quot;</span><span style="color:#D20">9200</span><span style="color:#710">&quot;</span></span></code></pre>
+</div>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-338">
+<p><strong>Environment configs mounting definition in the deployment.yaml</strong>
+This is informational. Nothing to do unless you want to change the mount location or type.</p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-342">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml">          <span style="color:#606">volumeMounts</span>:
+          - <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">mountPath: /optimize/config/environment-config.yaml</span></span>
+            <span style="color:#606">subPath</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">environment-config.yaml</span></span>
+            <span style="color:#606">name</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">environment-config</span></span>
+
+      <span style="color:#606">volumes</span>:
+      - <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">name: environment-config</span></span>
+        <span style="color:#606">configMap</span>:
+          <span style="color:#606">name</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">environment-config</span></span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-355">
+<h4 id="_step_6_configure_the_optimize_license"><strong>Step 6:</strong> <a id="optimize-license"></a>Configure the Optimize License</h4>
+<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-356">
+<div class="content">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-357">
+<p><strong>Add your license to the data-license.yaml</strong></p>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-359">
+<p><strong>Defaults Below</strong></p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-361">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml"><span style="color:#606">apiVersion</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">v1</span></span>
+<span style="color:#606">kind</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">ConfigMap</span></span>
+<span style="color:#606">metadata</span>:
+  <span style="color:#606">labels</span>:
+    {{- <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">include &quot;camunda-optimize.labels&quot; . | nindent 4 }}</span></span>
+  <span style="color:#606">name</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">optimize-license</span></span>
+<span style="color:#606">data</span>:
+  <span style="color:#606">OptimizeLicense.txt</span>:
+    <span style="color:#F00;background-color:#FAA">--------------- BEGIN CAMUNDA LICENSE KEY ---------------</span>
+
+    <span style="color:#F00;background-color:#FAA">---------------  END CAMUNDA LICENSE KEY  ---------------</span></code></pre>
+</div>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-375">
+<p><strong>The license ConfigMap mounting definition in the deplyment.yaml</strong>
+This is informational. Nothing to do unless you want to change the mount location or type.
+This will likly change to a secret in the near future.</p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-380">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="yaml">          <span style="color:#606">volumeMounts</span>:
+          - <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">mountPath: /optimize/config/OptimizeLicense.txt</span></span>
+            <span style="color:#606">subPath</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">OptimizeLicense.txt</span></span>
+            <span style="color:#606">name</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">optimize-license</span></span>
+
+      <span style="color:#606">volumes</span>:
+      - <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">name: optimize-license</span></span>
+        <span style="color:#606">configMap</span>:
+          <span style="color:#606">name</span>: <span style="background-color:hsla(0,100%,50%,0.05)"><span style="color:#D20">optimize-license</span></span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="admonitionblock tip has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-398">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+For more configuration options see <a href="https://github.com/camunda/docker-camunda-optimize/blob/next/README.md" class="bare">https://github.com/camunda/docker-camunda-optimize/blob/next/README.md</a>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-401">
+<h4 id="_step_7_run_the_chart"><a id="optimize-run"></a> <strong>Step 7:</strong> Run the Chart</h4>
+<div class="exampleblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-402">
+<div class="content">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-403">
+<p><strong>Runing the Chart</strong> the following command to install the chart and apply the configurations to the Kubernetes cluster</p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-404">
+<div class="content">
+<pre>helm install optimize-demo ./charts/camunda-optimize/</pre>
+</div>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-408">
+<p><strong>Change the Chart </strong>&#8201;&#8212;&#8201;When you make changes run the following command to apply the changes to the cluster</p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-409">
+<div class="content">
+<pre>helm upgrade optimize-demo ./charts/camunda-optimize/</pre>
+</div>
+</div>
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-413">
+<p><strong>Remove the Chart </strong> &#8201;&#8212;&#8201;To remove the installation</p>
+</div>
+<div class="listingblock has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-414">
+<div class="content">
+<pre>helm uninstall optimize-demo</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-421">
 <h2 id="_whats_next">Whats Next</h2>
 <div class="sectionbody">
-<div class="ulist checklist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-391">
+<div class="ulist checklist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-422">
 <ul class="checklist">
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-391">
-<p>[X] Configure Ingress and Scaling</p>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-422">
+<p>&#10003; Configure Ingress and Scaling</p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-392">
-<p>[X] Configuration for EE License (<strong>In Progress</strong>)</p>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-423">
+<p>&#10003; Configuration for EE License (<strong>In Progress</strong>)</p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-393">
-<p>[X] Configure common Optimize configs (Elastic, Engine)</p>
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-424">
+<p>&#10003; Configure common Optimize configs (Elastic, Engine)</p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-394">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-425">
 <p>&#10063; Configuration for Secrets Vault (HashiCorp, Spring Cloud Vault)</p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-395">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-426">
 <p>&#10063; Configuration for LDAP plugin</p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-396">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-427">
 <p>&#10063; Adding an Engine plugin</p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-397">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-428">
 <p>&#10063; Configuration for Logging</p>
-<div class="ulist checklist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-398">
+<div class="ulist checklist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-429">
 <ul class="checklist">
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-398">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-429">
 <p>&#10063; Configuration for Log Drain</p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-399">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-430">
 <p>&#10063; Configuration for ARGO</p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-400">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-431">
 <p>&#10063; Configuration for TERRAFORM</p>
 </li>
 </ul>
 </div>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-401">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-432">
 <p>&#10063; Configurations for SSO</p>
-<div class="ulist checklist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-402">
+<div class="ulist checklist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-433">
 <ul class="checklist">
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-402">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-433">
 <p>&#10063; with Keycloak</p>
 </li>
 </ul>
 </div>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-403">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-434">
 <p>&#10063; Configure auto-scaling</p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-404">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-435">
 <p>&#10063; Configure Cloud Deployments (GKE, AWS, Azure)</p>
 </li>
 </ul>
 </div>
 </div>
 </div>
-<div class="sect1 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-406">
+<div class="sect1 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-439">
 <h2 id="_based_on_camunda_helm">Based on Camunda Helm</h2>
 <div class="sectionbody">
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-407">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-440">
 <p><span class="image"><a class="image" href="https://artifacthub.io/packages/search?repo=camunda"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/camunda" alt="camunda"></a></span></p>
 </div>
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-409">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-442">
 <p><strong>More Info</strong></p>
 </div>
-<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-411">
+<div class="ulist has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-444">
 <ul>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-411">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-444">
 <p><a href="https://docs.camunda.org/optimize/develop/technical-guide" class="bare">https://docs.camunda.org/optimize/develop/technical-guide</a></p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-412">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-445">
 <p><a href="https://artifacthub.io/packages/helm/camunda/camunda-optimize" class="bare">https://artifacthub.io/packages/helm/camunda/camunda-optimize</a></p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-413">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-446">
 <p><a href="https://github.com/elastic/helm-charts" class="bare">https://github.com/elastic/helm-charts</a></p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-414">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-447">
 <p><a href="https://registry.camunda.cloud/harbor/projects/4/repositories" class="bare">https://registry.camunda.cloud/harbor/projects/4/repositories</a></p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-415">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-448">
 <p><a href="https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac" class="bare">https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac</a></p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-416">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-449">
 <p><a href="https://helm.sh/docs/intro/quickstart/" class="bare">https://helm.sh/docs/intro/quickstart/</a></p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-417">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-450">
 <p><a href="https://hub.docker.com/r/camunda/camunda-optimize" class="bare">https://hub.docker.com/r/camunda/camunda-optimize</a></p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-418">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-451">
 <p><a href="https://kubernetes.github.io/ingress-nginx/examples/affinity/cookie/" class="bare">https://kubernetes.github.io/ingress-nginx/examples/affinity/cookie/</a></p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-419">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-452">
 <p><a href="https://github.com/camunda/camunda-helm" class="bare">https://github.com/camunda/camunda-helm</a></p>
 </li>
-<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-420">
+<li class="has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-453">
 <p><a href="https://github.com/camunda/docker-camunda-optimize" class="bare">https://github.com/camunda/docker-camunda-optimize</a></p>
 </li>
 </ul>
 </div>
 </div>
 </div>
-<div class="sect1 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-422">
+<div class="sect1 has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-457">
 <h2 id="_project_state">Project state</h2>
 <div class="sectionbody">
-<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-424">
+<div class="paragraph has-source-line data-line-/Users/paullungu/projects/camunda-optimize-helm/README.adoc-459">
 <p>This project is in <strong>alpha</strong> phase.</p>
 </div>
 </div>
@@ -1172,7 +1273,7 @@ Update the values.yaml in for the correct version of Elastic. <strong>Tested wit
 <div id="footer">
 <div id="footer-text">
 Version 1.0<br>
-Last updated 2021-08-13 16:00:49 -0600
+Last updated 2021-08-14 13:58:34 -0600
 </div>
 </div>
 </body>

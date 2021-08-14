@@ -1,252 +1,76 @@
 = Camunda HELM Charts
 Doc Writer <paul.lungu@camunda.com>
-v1.0, 2020-03-15
+v1.0, 2020-08-13
 :toc:
 
 == Goals
 - Simple and understandable HELM Optimize example
-- Apply common configuration and architectural concepts
-- Good documentation with little assumptions of understanding HELM, Kubernetes or Optimize
-- Able to run quickly without help out side this README
+- Help understand common configuration and architectural concepts
+- Good documentation and example to assist in getting Optimize running quickly in Kubernetes
+- *NOT* intended as a production ready configuration
 
 
 == What is configured in this chart
 - [x] Optimize
-- [ ] Optimize EE Repo Pull
-- [ ] Optimize License
+- [x] Optimize EE Repo Pull
+- [x] Optimize License
 - [x] Load Balancer with sticky sessions
 - [x] Elastic Search
 
-//=== Broken
-//- [ ] Optimize EE Repo Pull
-//- [ ] Optimize License
 
-== How to run this Helm chart
+== How does it work
 
-*Install HELM and Kubernetes*
+IMPORTANT: The configs in this chart are preconfigured defaults and serve as a quick reference for understanding. *You may need to change and adjust things to suit your use-case, infra, architecture, etc ...*
+
+- The HELM chart is an install descriptor to install Optimize on Kubernetes. HELM can do many things to help install and manage infra on Kubernetes.
+- The primary configuration point is the values.yaml. It should allow you to get a basic Optimize configuration installed and running with little to no customizations.
+- You still need to know how to debug on Kubernetes. See the https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application/[Kubernetes Docs] for help.
+- While this chart defines how Optimize is installed other components need to be installed in your Kubernetes cluster to make Optimize work. See <<steps-to-run, Setting up Infra>> to install the other components.
+- You can find more on HELM here https://helm.sh/docs/intro/quickstart/[Helm Quickstart]
+
+== [[steps-to-run]]Steps to run this HELM chart
+
+==== *STOP* before you run it
 ====
-Though the goal of this is to be able to run this example quickly and easily the assumption is you have some experience with Kubernetes and HELM.
+*Step 0. <<install-helm, Install HELM and Kubernetes>>* if not already installed
 
-You can find more on HELM here https://helm.sh/docs/intro/quickstart/[Helm Quickstart]
-====
+*Step 1. <<install-ingress-controller, Install Ingress Contorller>> to configure the loadbalaner ingress controller*
 
-==== Prerequisites before you run
-NOTE: These can be omitted if you run the basic HELM chart without the Postgres DB and only a single node in the cluster without a load balancer
-====
-*See <<configure-external-elastic-search, Install and Configure Elastic Search>> in the Kubernetes cluster*
+*Step 2. <<configure-external-elastic-search, Install and Configure Elastic Search>> in the Kubernetes cluster*
 
-*See <<install-ingress-controller, Install Ingress Contorller>> to configure the loadbalaner ingress controller*
+*Step 3. <<run-camunda, Run Camunda>> you will need a Camunda instance Optimize can pull data from*
 
-*See <<optimize-license, Install Optimize License>> to download and install Optimize License*
+*Step 4. <<optimize-version, Configure Optimize Version>>*
 
-*See <<run-camunda, Run Camunda>> to install and run a Camunda instance Optimize can pull data from*
+*Step 5. <<optimize-connections, Configure Optimize Connections>> to Camunda and Elastic Search*
 
-*See <<optimize-configure, Configure Optimize Connections>> to connect to Camunda and Elastic Search*
+*Step 6. <<optimize-license, Install Optimize License>>*
 
-====
-
-==== Run the Chart
-====
-**Runing the Chart** the following command to install the chart and apply the configurations to the Kubernetes cluster
-----
-helm install optimize-demo ./camunda/camunda-helm/charts/camunda-optimize/
-----
-
-**Change the Chart ** -- When you make changes run the following command to apply the changes to the cluster
-----
-helm upgrade optimize-demo ./camunda/camunda-helm/charts/camunda-optimize/
-----
-
-**Remove the Chart **  -- To remove the installation
-----
-helm uninstall optimize-demo
-----
-
-====
-
-==  How does it work
-
-=== values.yaml
-
-IMPORTANT: the primary configuration point is the values.yaml. The configs below have already been applied. The configs below are a quick reference for understanding.
-
-
-== Prerequisites for setting up Optimize
-
-=== Configure the version of Optimize
-====
-In this case the latest image is used. But we could swap different images and versions.
-
-See the https://registry.camunda.cloud/harbor/projects/4/repositories[Camunda Harbor Repo] if you need a different version of Optimize.
-
-*Pulling from the Enterprise Repo*
-
-NOTE: you will need your enterprise credentials and an enterprise license for Optimize.
-
-The version of Optimize can be changed in this section of the values.yaml
-
-[source,yaml]
-----
-image:
-  repository: registry.camunda.cloud/optimize-ee/optimize
-  tag: latest
-  pullPolicy: IfNotPresent
-  pullSecrets:
-    - name: camunda-reg-cred
-----
-
-*Configuring the pullSecrets*
-
-TIP: see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/[Configuring pull secrets kubernetes doc] for more info
-
-Install the secret and name it camunda-reg-cred
-
-----
-kubectl create secret docker-registry camunda-reg-cred --docker-server=registry.camunda.cloud --docker-username=<<user>> --docker-password=<<password>> --docker-email=paul.lungu@camunda.com
-----
-
-Check your secret
-----
-kubectl get secret camunda-reg-cred --output=yaml
-
-kubectl get secret camunda-reg-cred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode
-----
-
-====
-
----
-
-=== [[optimize-configure]]Configure Optimize Connections
-====
-*Configurations can be placed in the environment-config ConfigMap defined in data-environment.yaml*
-This will be mounted as a file in the Pod in the config directory as environment-config.yaml
-[source,yaml]
-----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  labels:
-    {{- include "camunda-optimize.labels" . | nindent 4 }}
-  name: environment-config
-data:
-    environment-config.yaml: |
-        engines:
-          'camunda-bpm':
-            name: {{ .Values.camunda.engine.name }}
-            rest: {{ .Values.camunda.engine.restUrl }}
-            importEnabled: {{ .Values.camunda.engine.importEnabled }}
-            eventImportEnabled: {{ .Values.camunda.engine.eventImportEnabled }}
-            webapps:
-              endpoint: {{ .Values.camunda.engine.webappsUrl }}
-              enabled: {{ .Values.camunda.engine.webappsEnabled }}
-            authentication:
-              enabled: {{ .Values.camunda.engine.authentication.enabled }}
-              user: {{ .Values.camunda.engine.authentication.user }}
-              password: {{ .Values.camunda.engine.authentication.password }}
-        es:
-          connection.nodes[*]:
-              host: {{ .Values.elasitc.external.host }}
-              httpPort: {{ .Values.elasitc.external.port }}
-----
-
-
-See the https://docs.camunda.org/optimize/develop/technical-guide/setup/configuration[possible configurations for Optimize]
-
-
-*Configure the connection to Camunda*
-
-See <<running-camunda, Running Camunda>> to ensure you have a running Camunda instance.
-
-See values.yaml to update configs. *Make sure to upadte the restUrl and webappsUrl with the correct config.*
-
-[source,yaml]
-----
-camunda:
-  engine:
-    name: "default"
-    webappsEnabled: true
-    restUrl: "http://10.1.0.40:8080/engine-rest"
-    webappsUrl: "http://10.1.0.40:8080/camunda"
-    importEnabled: true
-    eventImportEnabled: true
-    authentication:
-      enabled: false
-      user: ''
-      password: ''
-----
-
-*Configure Connection to Elastic Search*
-See values.yaml to update configs
-[source,yaml]
-----
-elasitc:
-  external:
-    enabled: true
-    credentialsSecertName: "elastic-search-credentials"
-    host: "elasticsearch-master"
-    port: "9200"
-----
-
-*Environment configs mounting definition in the deployment.yaml*
-[source,yaml]
-----
-          volumeMounts:
-          - mountPath: /optimize/config/environment-config.yaml
-            subPath: environment-config.yaml
-            name: environment-config
-
-      volumes:
-      - name: environment-config
-        configMap:
-          name: environment-config
-----
-====
-
-=== [[optimize-license]]Configure the Optimize License
-====
-*The license will be mounted from in the ConfigMap* See the deployment.yaml for mounts
-[source,yaml]
-----
-          volumeMounts:
-          - mountPath: /optimize/config/OptimizeLicense.txt
-            subPath: OptimizeLicense.txt
-            name: optimize-license
-
-      volumes:
-      - name: optimize-license
-        configMap:
-          name: optimize-license
-----
-
-
-//The `licenseSecertName:` allows us to use a secret resource for DB credentials.
-//
-//The `url:` uses the deployment name of the postgres resource. This is echoed in the notes after the install.
-
-
-*Add your license to the data-license.yaml*
-[source,yaml]
-----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  labels:
-    {{- include "camunda-optimize.labels" . | nindent 4 }}
-  name: optimize-license
-data:
-  OptimizeLicense.txt:
-    --------------- BEGIN CAMUNDA LICENSE KEY ---------------
-
-    ---------------  END CAMUNDA LICENSE KEY  ---------------
-----
-
-For more configuration options see https://github.com/camunda/docker-camunda-optimize/blob/next/README.md
+*Step 6. <<optimize-run, Run Optimize>>*
 ====
 
 
-=== [[install-ingress-controller]]Configure Load Balancer with Sticky Sessions
+== [[setup-infra]] Setup Infra and Architecture for Optimize
+
+==== [[install-helm]] *Step 0:* Install HELM and Kubernetes
 ====
-IMPORTANT: Kuberneted does not come with an implementation of a LoadBalancer or a Reverse Proxy for Ingress. The Ingerss resource allows you to configure a Controller for your needs. It's important to understand what you need from an inrgess resource then you can choose the appropriate Controller to install. There are a variety of vendors.
+- You can find more on HELM here https://helm.sh/docs/intro/quickstart/[Helm Quickstart]
+- https://kubernetes.io/docs/setup/[Kubernetes Getting Started]
+- Try https://www.docker.com/products/docker-desktop[Docker Desktop] imo it's the quickest way to get started with Kubernetes
+
+- Tested with HELM
+** `version.BuildInfo{Version:"v3.5.3", GitCommit:"041ce5a2c17a58be0fcd5f5e16fb3e7e95fea622", GitTreeState:"dirty", GoVersion:"go1.16"}`
+
+- Tested with Kubernetes
+** `Client Version: version.Info{Major:"1", Minor:"21", GitVersion:"v1.21.2", GitCommit:"092fbfbf53427de67cac1e9fa54aaa09a28371d7", GitTreeState:"clean", BuildDate:"2021-06-16T12:59:11Z", GoVersion:"go1.16.5", Compiler:"gc", Platform:"darwin/amd64"}`
+
+** `Server Version: version.Info{Major:"1", Minor:"21", GitVersion:"v1.21.2", GitCommit:"092fbfbf53427de67cac1e9fa54aaa09a28371d7", GitTreeState:"clean", BuildDate:"2021-06-16T12:53:14Z", GoVersion:"go1.16.5", Compiler:"gc", Platform:"linux/amd64"}`
+
+====
+
+==== [[install-ingress-controller]] *Step 1:* Install Ingress Controller with Sticky Sessions
+====
+IMPORTANT: Kubernetes does not come with an implementation of a LoadBalancer or a Reverse Proxy for Ingress. The Ingerss resource allows you to configure a Controller for your needs. It's important to understand what you need from an inrgess resource then you can choose the appropriate Controller to install. There are a variety of vendors.
 
 *Tested with* https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac
 
@@ -258,10 +82,11 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 
 ---
 
-*Configure the Ingress Resource for nginx with sticky sessions*
+===== Configure the Ingress resource for Nginx with sticky sessions
 ====
 Update the values.yaml and configure the Ingress Resource to tell the LoadBalancer (the NGINX deployment that was installed above) to stick to one Optimize instance once the user is logged into the webapps.
 
+*Defaults Below*
 [source,yaml]
 ----
   ingress:
@@ -285,28 +110,16 @@ Update the values.yaml and configure the Ingress Resource to tell the LoadBalanc
     #      - camunda-optimize.local   - camunda-optimize.local
 
 ----
-
-*Troubleshoot Ingress, Pods and Services*
-
-* Check the Service and Ingress endpoints
-** `kubectl describe ingress optimize-demo-camunda-optimize`
-** `kubectl describe service optimize-demo-camunda-optimize`
-
-* Check the pods
-** `kubectl describe pods optimize-demo-camunda-optimize`
-
-* Check that the Service Selectors get the pods
-** `kubectl get pods --show-labels | egrep 'app.kubernetes.io/instance=optimize-demo,app.kubernetes.io/name=camunda-optimize'`
-
 ====
 
 ---
 
-*Increase the replica count of the Nodes*
+===== Increase the replica count of the Nodes
 ====
 
 Update the values.yaml and increase the replica count so the load balancer will send requests to both nodes for a user that is not already logged in to web apps.
 
+*Defaults Below*
 [source,yaml]
 ----
 general:
@@ -319,8 +132,25 @@ general:
 
 ---
 
+===== Troubleshoot Kubernetes Resources
+====
+*Troubleshoot Ingress, Pods and Services*
+
+* Check the Service and Ingress endpoints
+** `kubectl describe ingress optimize-demo-camunda-optimize`
+** `kubectl describe service optimize-demo-camunda-optimize`
+
+* Check the pods
+** `kubectl describe pods optimize-demo-camunda-optimize`
+
+* Check that the Service Selectors get the pods
+** `kubectl get pods --show-labels | egrep 'app.kubernetes.io/instance=optimize-demo,app.kubernetes.io/name=camunda-optimize'`
+====
+
+---
+
 [[configure-external-elastic-search]]
-=== Configure an External Elastic Search Instance
+=== *Step 2:* Configure an External Elastic Search Instance
 
 *Download the Elastic HELM charts*
 
@@ -329,6 +159,7 @@ Download with GIT: https://github.com/elastic/helm-charts[Elastic HELM Charts]
 *Update the values.yaml*
 Update the values.yaml in for the correct version of Elastic. *Tested with 7.11.2* in the https://github.com/elastic/helm-charts/tree/master/elasticsearch/examples/docker-for-mac[Docker for Mac Examples].
 
+*Use Values Below*
 [source,yaml]
 ----
 # Permit co-located instances for solitary minikube virtual machines.
@@ -372,7 +203,7 @@ Test the install
   curl localhost:9200/_cat/indices
 ----
 
-=== [[run-camunda]] Run Camunda
+=== [[run-camunda]] *Step 3:* Run Camunda
 ====
 
 To Run Camunda see the
@@ -385,12 +216,212 @@ To Run Camunda see the
 
 ====
 
+== [[optimize-setup]]Setup Optimize
+
+==== [[optimize-version]] *Step 4:* Configure the version of Optimize
+====
+In this case the latest image is used. But we could swap different images and versions.
+
+See the https://registry.camunda.cloud/harbor/projects/4/repositories[Camunda Harbor Repo] if you need a different version of Optimize.
+
+*Pulling from the Enterprise Repo*
+
+NOTE: you will need your enterprise credentials and an enterprise license for Optimize.
+
+The version of Optimize can be changed in this section of the values.yaml
+
+*Defaults Below*
+[source,yaml]
+----
+image:
+  repository: registry.camunda.cloud/optimize-ee/optimize
+  tag: latest
+  pullPolicy: IfNotPresent
+  pullSecrets:
+    - name: camunda-reg-cred
+----
+
+*Configuring the pullSecrets*
+
+TIP: see https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/[Configuring pull secrets kubernetes doc] for more info
+
+Install the secret and name it camunda-reg-cred
+
+----
+kubectl create secret docker-registry camunda-reg-cred --docker-server=registry.camunda.cloud --docker-username=<<user>> --docker-password=<<password>> --docker-email=paul.lungu@camunda.com
+----
+
+Check your secret
+----
+kubectl get secret camunda-reg-cred --output=yaml
+
+kubectl get secret camunda-reg-cred --output="jsonpath={.data.\.dockerconfigjson}" | base64 --decode
+----
+
+====
+
+---
+
+==== *Step 5:* [[optimize-connections]]Configure Optimize Connections
+====
+*Configure the connection to Camunda*
+
+See <<running-camunda, Running Camunda>> to ensure you have a running Camunda instance.
+
+See values.yaml to update configs. *Make sure to upadte the restUrl and webappsUrl with the correct config.*
+
+*Defaults Below*
+[source,yaml]
+----
+camunda:
+  engine:
+    name: "default"
+    webappsEnabled: true
+    restUrl: "http://10.1.0.40:8080/engine-rest"
+    webappsUrl: "http://10.1.0.40:8080/camunda"
+    importEnabled: true
+    eventImportEnabled: true
+    authentication:
+      enabled: false
+      user: ''
+      password: ''
+----
+
+TIP: See the https://docs.camunda.org/optimize/develop/technical-guide/setup/configuration[possible configurations for Optimize]
+
+*The environment-config ConfigMap defined in data-environment.yaml applies the configs to Optimize*
+This will be mounted as a file in the Pod in the config directory as environment-config.yaml where Optimize can pick it up. If you wish to add additional configs you can use this config map and expose the variables in the values.yaml
+
+*Defaults Below*
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "camunda-optimize.labels" . | nindent 4 }}
+  name: environment-config
+data:
+  environment-config.yaml: |
+    engines:
+      'camunda-bpm':
+        name: {{ .Values.camunda.engine.name }}
+        rest: {{ .Values.camunda.engine.restUrl }}
+        importEnabled: {{ .Values.camunda.engine.importEnabled }}
+        eventImportEnabled: {{ .Values.camunda.engine.eventImportEnabled }}
+        webapps:
+          endpoint: {{ .Values.camunda.engine.webappsUrl }}
+          enabled: {{ .Values.camunda.engine.webappsEnabled }}
+        authentication:
+          enabled: {{ .Values.camunda.engine.authentication.enabled }}
+          user: {{ .Values.camunda.engine.authentication.user }}
+          password: {{ .Values.camunda.engine.authentication.password }}
+      es:
+        connection.nodes[*]:
+          host: {{ .Values.elasitc.external.host }}
+          httpPort: {{ .Values.elasitc.external.port }}
+----
+
+*Configure Connection to Elastic Search*
+See values.yaml to update configs
+
+*Defaults Below*
+[source,yaml]
+----
+elasitc:
+  external:
+    enabled: true
+    host: "elasticsearch-master"
+    port: "9200"
+----
+
+*Environment configs mounting definition in the deployment.yaml*
+This is informational. Nothing to do unless you want to change the mount location or type.
+
+[source,yaml]
+----
+          volumeMounts:
+          - mountPath: /optimize/config/environment-config.yaml
+            subPath: environment-config.yaml
+            name: environment-config
+
+      volumes:
+      - name: environment-config
+        configMap:
+          name: environment-config
+----
+====
+
+==== *Step 6:* [[optimize-license]]Configure the Optimize License
+====
+*Add your license to the data-license.yaml*
+
+*Defaults Below*
+[source,yaml]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "camunda-optimize.labels" . | nindent 4 }}
+  name: optimize-license
+data:
+  OptimizeLicense.txt:
+    --------------- BEGIN CAMUNDA LICENSE KEY ---------------
+
+    ---------------  END CAMUNDA LICENSE KEY  ---------------
+----
+
+*The license ConfigMap mounting definition in the deplyment.yaml*
+This is informational. Nothing to do unless you want to change the mount location or type.
+This will likly change to a secret in the near future.
+
+[source,yaml]
+----
+          volumeMounts:
+          - mountPath: /optimize/config/OptimizeLicense.txt
+            subPath: OptimizeLicense.txt
+            name: optimize-license
+
+      volumes:
+      - name: optimize-license
+        configMap:
+          name: optimize-license
+----
+
+
+//The `licenseSecertName:` allows us to use a secret resource for DB credentials.
+//
+//The `url:` uses the deployment name of the postgres resource. This is echoed in the notes after the install.
+
+====
+TIP: For more configuration options see https://github.com/camunda/docker-camunda-optimize/blob/next/README.md
+
+
+==== [[optimize-run]] *Step 7:* Run the Chart
+====
+**Runing the Chart** the following command to install the chart and apply the configurations to the Kubernetes cluster
+----
+helm install optimize-demo ./charts/camunda-optimize/
+----
+
+**Change the Chart ** -- When you make changes run the following command to apply the changes to the cluster
+----
+helm upgrade optimize-demo ./charts/camunda-optimize/
+----
+
+**Remove the Chart **  -- To remove the installation
+----
+helm uninstall optimize-demo
+----
+====
+
 
 
 == Whats Next
-- [X] Configure Ingress and Scaling
-- [X] Configuration for EE License (*In Progress*)
-- [X] Configure common Optimize configs (Elastic, Engine)
+- [x] Configure Ingress and Scaling
+- [x] Configuration for EE License (*In Progress*)
+- [x] Configure common Optimize configs (Elastic, Engine)
 - [ ] Configuration for Secrets Vault (HashiCorp, Spring Cloud Vault)
 - [ ] Configuration for LDAP plugin
 - [ ] Adding an Engine plugin
@@ -402,6 +433,8 @@ To Run Camunda see the
 ** [ ] with Keycloak
 - [ ] Configure auto-scaling
 - [ ] Configure Cloud Deployments (GKE, AWS, Azure)
+
+
 
 == Based on Camunda Helm
 image:https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/camunda[link=https://artifacthub.io/packages/search?repo=camunda]
@@ -418,6 +451,8 @@ image:https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repositor
 - https://kubernetes.github.io/ingress-nginx/examples/affinity/cookie/
 - https://github.com/camunda/camunda-helm
 - https://github.com/camunda/docker-camunda-optimize
+
+
 
 == Project state
 
