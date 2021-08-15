@@ -45,8 +45,8 @@ camunda:
   engine:
     name: "default"
     webappsEnabled: true
-    restUrl: "http://10.1.0.40:8080/engine-rest"
-    webappsUrl: "http://10.1.0.40:8080/camunda"
+    restUrl: "http://<cluster_ip_endpoint>:8080/engine-rest"
+    webappsUrl: "http://<cluster_ip_endpoint>:8080/camunda"
     importEnabled: true
     eventImportEnabled: true
     authentication:
