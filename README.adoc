@@ -1,4 +1,4 @@
-= Camunda HELM Charts
+= Camunda Optimize HELM Charts
 Doc Writer <paul.lungu@camunda.com>
 v1.0, 2020-08-13
 :toc:
@@ -222,6 +222,7 @@ To Run Camunda see the
 == [[optimize-setup]]Setup Optimize
 
 ==== [[optimize-version]] *Step 4:* Configure the version of Optimize
+IMPORTANT: https://camunda.com/download/enterprise/[Get an enterprise trial to try Optimize]
 ====
 In this case the latest image is used. But we could swap different images and versions.
 
