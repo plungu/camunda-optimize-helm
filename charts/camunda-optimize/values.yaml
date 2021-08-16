@@ -45,8 +45,8 @@ camunda:
   engine:
     name: "default"
     webappsEnabled: true
-    restUrl: "http://<cluster_ip_endpoint>:8080/engine-rest"
-    webappsUrl: "http://<cluster_ip_endpoint>:8080/camunda"
+    restUrl: "http://workflow-demo-camunda-bpm-platform:8080/engine-rest"
+    webappsUrl: "http://workflow-demo-camunda-bpm-platform:8080/camunda"
     importEnabled: true
     eventImportEnabled: true
     authentication:

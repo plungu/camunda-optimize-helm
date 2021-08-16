@@ -282,21 +282,20 @@ kubectl get secret camunda-reg-cred --output="jsonpath={.data.\.dockerconfigjson
 ====
 *Configure the connection to Camunda*
 
-See <<running-camunda, Running Camunda>> to ensure you have a running Camunda instance.
+See <<run-camunda, Running Camunda>> to ensure you have a running Camunda instance.
 
-Go to values.yaml to update configs. *Make sure to update the restUrl and webappsUrl with the correct config from the endpoint assigned to Cluster Service.*
+IMPORTANT: You need to do this step if you did not use the https://github.com/plungu/camunda-helm[Camunda-HELM] project to install Camunda BPM and you defined your own Camunda BPM deployment and services.
 
-Update the `<cluster_ip_endpoint>` with the corresponding Service Endpoint.
+Go to values.yaml to update configs. *Make sure to update the restUrl and webappsUrl with the correct config from the ClusterIP Service you've defined.*
 
-You can find the correct endpoint by checking the Service.
 
- kubectl describe services workflow-demo-camunda-bpm-platform
+Replace `<workflow-demo-camunda-bpm-platform>` with the corresponding Service Endpoint.
 
-Locate the `IP:` property
+You can find your correct Camunda BPM endpoint by checking the Service you defined.
 
- IP:                10.111.35.194
+ kubectl get service
 
-Update the `<cluster_ip_endpoint>` with the corresponding Service Endpoint.
+*Again, understand that you only need to change this value if you defined your own Camunda BPM deployments and services. If you used the https://github.com/plungu/camunda-helm[Camunda-HELM] project to install Camunda BPM then you do not need to change the config.*
 
 *Defaults Below*
 [source,yaml]
@@ -307,8 +306,8 @@ camunda:
   engine:
     name: "default"
     webappsEnabled: true
-    restUrl: "http://<cluster_ip_endpoint>:8080/engine-rest"
-    webappsUrl: "http://<cluster_ip_endpoint>:8080/camunda"
+    restUrl: "http://workflow-demo-camunda-bpm-platform:8080/engine-rest"
+    webappsUrl: "http://workflow-demo-camunda-bpm-platform:8080/camunda"
     importEnabled: true
     eventImportEnabled: true
     authentication:
