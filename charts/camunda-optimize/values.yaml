@@ -81,7 +81,8 @@ optimize:
     directory:
 
 
-# Kubernetes Service Resource
+# Using NodePort for AWS EKS Controller
+# Use ClusterIP for Nginx Controller
 service:
   type: ClusterIP
   port: 8090

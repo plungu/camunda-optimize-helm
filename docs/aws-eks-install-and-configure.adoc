@@ -70,6 +70,22 @@ elbIngress:
 ----
 ====
 
+=== Change the service
+====
+
+IMPORTANT: make sure to change the service.type to NodePort.
+
+[source,yaml]
+----
+# Using NodePort for AWS EKS Controller
+# Use ClusterIP for Nginx Controller
+  service:
+   type: NodePort
+   port: 8080
+   portName: http
+----
+====
+
 ==== Configure Connection to Elastic Search
 ====
 See link:../charts/camunda-optimize/values.yaml[values.yaml] to update configs. *You will need to change the `host` and `username` and `password` based on the AWS ElasticSearch config* <<provision-aws-elastic-search,See Step 2>>
