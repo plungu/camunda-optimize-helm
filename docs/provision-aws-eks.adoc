@@ -1,0 +1,139 @@
+= AWS EKS Provision Cluster
+Doc Writer <paul.lungu@camunda.com>
+v1.0, 2020-08-13
+:toc:
+
+== Step 1: Install and use CLI tools to provision EKS cluster
+
+See docs https://eksctl.io/introduction/[here]
+
+The purpose of this doc is to install the tools necessary to provision the EKS cluster, work with the cluster, install Optimize and provision the cluster itself.
+
+==== Install eksctl tool
+
+ brew tap weaveworks/tap
+
+ brew install weaveworks/tap/eksctl
+
+NOTE: you may need to install XCODE
+
+==== Install AWS CLI
+
+ curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+
+ sudo installer -pkg AWSCLIV2.pkg -target /
+
+==== Create IAM user on AWS
+
+[See docs here]
+
+==== Add configs and credentials to your local (MAC) home dir
+
+https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html[See the AWS docs for details]
+
+Create the files
+
+- `nano ~/.aws/credentials`
+- `nano ~/.aws/config`
+
+https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html[See the AWS docs for details]
+
+- copy the IAM user creds into the file
+
+
+== Step 2: Provision the cluster
+
+=== Create the cluster
+
+ eksctl create cluster --name camunda-cluster --version 1.17 --region us-west-2 --nodegroup-name camunda-nodes --node-type t2.micro --nodes 2
+
+==== Remove the cluster if needed
+
+ eksctl delete cluster --name camunda-cluster
+
+TIP: See the cluster you provisioned in https://console.aws.amazon.com/eks/home[AWS EKS Console]
+
+==== Use aws cli add the context for the EKS kuberentes cluster to kubectl
+
+ aws eks --region us-west-2 update-kubeconfig --name camunda-cluster
+
+See more about CLI https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-mac.html#cliv2-mac-install-cmd[install here] and https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html[config quickstart here]
+
+===== Check the context
+
+ kubectl config current-context
+
+ cat /Users/paullungu/.kube/config
+
+
+
+
+//
+//aws iam create-policy \
+//--policy-name CamundaAWSLoadBalancerControllerIAMPolicy \
+//--policy-document file://iam_policy.json
+//
+//{
+//"Policy": {
+//"PolicyName": "CamundaAWSLoadBalancerControllerIAMPolicy",
+//"PolicyId": "ANPATX42ZPLYXR55ZYXPS",
+//"Arn": "arn:aws:iam::257485798129:policy/CamundaAWSLoadBalancerControllerIAMPolicy",
+//"Path": "/",
+//"DefaultVersionId": "v1",
+//"AttachmentCount": 0,
+//"PermissionsBoundaryUsageCount": 0,
+//"IsAttachable": true,
+//"CreateDate": "2021-08-20T02:37:52+00:00",
+//"UpdateDate": "2021-08-20T02:37:52+00:00"
+//}
+//}
+//
+//eksctl create iamserviceaccount \
+//--cluster=camunda-cluster \
+//--namespace=kube-system \
+//--name=aws-load-balancer-controller \
+//--attach-policy-arn=arn:aws:iam::257485798129:policy/CamundaAWSLoadBalancerControllerIAMPolicy \
+//--override-existing-serviceaccounts \
+//--approve
+//
+//
+//aws iam create-policy \
+//--policy-name CamundaAWSLoadBalancerControllerAdditionalIAMPolicy \
+//--policy-document file://iam_policy_v1_to_v2_additional.json
+//
+//{
+//"Policy": {
+//"PolicyName": "CamundaAWSLoadBalancerControllerAdditionalIAMPolicy",
+//"PolicyId": "ANPATX42ZPLY3CWCHQXLG",
+//"Arn": "arn:aws:iam::257485798129:policy/CamundaAWSLoadBalancerControllerAdditionalIAMPolicy",
+//"Path": "/",
+//"DefaultVersionId": "v1",
+//"AttachmentCount": 0,
+//"PermissionsBoundaryUsageCount": 0,
+//"IsAttachable": true,
+//"CreateDate": "2021-08-20T02:44:54+00:00",
+//"UpdateDate": "2021-08-20T02:44:54+00:00"
+//}
+//}
+//
+//aws iam attach-role-policy \
+//--role-name eksctl-camunda-cluster-addon-iamserviceaccou-Role1-39PZ6UNDZWDW \
+//--policy-arn arn:aws:iam::257485798129:policy/CamundaAWSLoadBalancerControllerAdditionalIAMPolicy
+//
+//
+//
+//
+//helm upgrade -i aws-load-balancer-controller eks/aws-load-balancer-controller \
+//--set clusterName=camunda-cluster \
+//--set serviceAccount.create=false \
+//--set serviceAccount.name=aws-load-balancer-controller \
+//-n kube-system
+//
+//
+//kubectl create secret docker-registry camunda-reg-cred --docker-server=registry.camunda.cloud --docker-username=paul.lungu --docker-password=poft3mal\!tair_CLOG --docker-email=paul.lungu@camunda.com
+//
+//
+//aws es create-elasticsearch-domain --domain-name camunda-es --elasticsearch-version 7.10 --elasticsearch-cluster-config  InstanceType=r6g.large.elasticsearch,InstanceCount=2 --ebs-options EBSEnabled=true,VolumeType=gp2,VolumeSize=10 --access-policies '{"Version": "2012-10-17", "Statement": [{"Action": "es:*", "Principal":"*","Effect": "Allow", "Condition": {"IpAddress":{"aws:SourceIp":["192.0.2.0/32"]}}}]}'
+//
+//
+//

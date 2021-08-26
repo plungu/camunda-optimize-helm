@@ -78,6 +78,10 @@ spec:
             subPath: OptimizeLicense.txt
             name: optimize-license
 
+          - mountPath: /optimize/config/cert.pem
+            subPath: cert.pem
+            name: optimize-cert
+
       volumes:
       - name: environment-config
         configMap:
@@ -86,6 +90,10 @@ spec:
       - name: optimize-license
         secret:
           secretName: optimize-license
+
+      - name: optimize-cert
+        secret:
+          secretName: optimize-cert
 
       {{- with .Values.nodeSelector }}
       nodeSelector:

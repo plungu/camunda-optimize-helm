@@ -17,6 +17,7 @@ v1.0, 2020-08-13
 - [x] Load Balancer with sticky sessions
 - [x] Elastic Search
 
+NOTE: for example of installing on AWS EKS see link:docs/provision-aws-eks.adoc[Install Optimize on EKS]
 
 == How does it work
 
@@ -300,7 +301,7 @@ You can find your correct Camunda BPM endpoint by checking the Service you defin
 *Defaults Below*
 [source,yaml]
 ----
-# Optimize Camunda connection configurations
+# Optimize Camunda Platform connection configurations
 # These have not yet been applied in the data-environment.yaml
 camunda:
   engine:

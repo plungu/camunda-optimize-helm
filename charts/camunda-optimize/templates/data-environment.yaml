@@ -22,11 +22,18 @@ data:
         es:
           connection:
             timeout: {{ .Values.elasitc.connect.timeout }}
-            nodes:
-              host: {{ .Values.elasitc.connect.host }}
-              httpPort: {{ .Values.elasitc.connect.port }}
+{{/*            nodes:*/}}
+{{/*              host: {{ .Values.elasitc.connect.host }}*/}}
+{{/*              httpPort: {{ .Values.elasitc.connect.port }}*/}}
           proxy:
             enabled: {{ .Values.elasitc.connect.proxy.enabled }}
             host: {{ .Values.elasitc.connect.proxy.host }}
             port: {{ .Values.elasitc.connect.proxy.port }}
             sslEnabled: {{ .Values.elasitc.connect.proxy.sslEnabled }}
+          security:
+            username: {{ .Values.elasitc.connect.security.username }}
+            password: {{ .Values.elasitc.connect.security.password }}
+            ssl:
+              enabled: {{ .Values.elasitc.connect.security.ssl.enabled }}
+              certificate: {{ .Values.elasitc.connect.security.ssl.certificate }}
+              certificate_authorities:  {{ .Values.elasitc.connect.security.ssl.certificate_authorities }}

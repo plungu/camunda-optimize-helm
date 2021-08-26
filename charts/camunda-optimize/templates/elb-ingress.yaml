@@ -1,0 +1,26 @@
+{{- if .Values.elbIngress.enabled -}}
+{{- $fullName := include "camunda-optimize.fullname" . -}}
+{{- $svcPort := .Values.service.port -}}
+{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "camunda-optimize.labels" . | nindent 4 }}
+  {{- with .Values.elbIngress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  rules:
+    - http:
+       paths:
+         - path: {{ .Values.elbIngress.hosts.path }}
+           backend:
+             serviceName: {{ $fullName }}
+             servicePort: {{ $svcPort }}
+{{- end }}

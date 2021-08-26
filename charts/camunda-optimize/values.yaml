@@ -5,7 +5,7 @@
 # General Configurations for Kubernetes
 general:
   debug: true
-  replicaCount: 2
+  replicaCount: 1
   nameOverride: ""
   fullnameOverride: ""
 
@@ -31,15 +31,15 @@ elasitc:
       port: 80
       sslEnabled: false
     security:
-      username:
-      password:
+      username: demo
+      password: Workflow1!
       ssl:
         enabled: false
-        certificate:
+        certificate: /optimize/config/cert.pem
         certificate_authorities: []
 
 
-# Optimize Camunda connection configurations
+# Optimize Camunda Platform connection configurations
 # These have not yet been applied in the data-environment.yaml
 camunda:
   engine:
@@ -119,6 +119,21 @@ ingress:
   #  - secretName: camunda-optimize-tls
   #    hosts:
   #      - camunda-optimize.local
+
+# Ingress config for AWS EKS ingress controller
+elbIngress:
+  enabled: false
+  annotations: {
+    kubernetes.io/ingress.class: alb,
+    alb.ingress.kubernetes.io/scheme: internet-facing,
+    #    alb.ingress.kubernetes.io/target-type: ip,
+  }
+  hosts:
+    path: /*
+#  tls: []
+#    - secretName: camunda-bpm-platform-tls
+#      hosts:
+#        - camunda-bpm-platform.local
 
 podAnnotations: {}
 
