@@ -17,7 +17,7 @@ v1.0, 2020-08-13
 - [x] Load Balancer with sticky sessions
 - [x] Elastic Search
 
-NOTE: for example of installing on AWS EKS see link:docs/provision-aws-eks.adoc[Install Optimize on EKS]
+NOTE: for example of installing on AWS EKS see link:docs/aws-eks-install-and-configure.adoc[Install Optimize on EKS]
 
 == How does it work
 
